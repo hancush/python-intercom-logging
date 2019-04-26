@@ -30,8 +30,9 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    description="Intercom Logging provides an extensible handler for " + \
-        "pushing messages associated with users to Intercom via the Python logging module.",
+    description="Intercom Logging provides an extensible handler for "
+    "pushing messages associated with users to Intercom via the Python "
+    "logging module.",
     install_requires=requirements,
     license="MIT license",
     long_description=readme,

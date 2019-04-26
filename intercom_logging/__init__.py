@@ -1,6 +1,6 @@
 import logging
 
-from intercom_logging.handlers import *
+from intercom_logging.handlers import *  # noqa
 
 
 FORMAT = '[%(asctime)s][%(levelname)s] %(name)s ' + \

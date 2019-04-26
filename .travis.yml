@@ -11,4 +11,4 @@ python:
 install: pip install -e . && pip install -r requirements_dev.txt
 
 # Command to run tests, e.g. python setup.py test
-script: pytest -sv
+script: pytest -sv --flake8

@@ -19,7 +19,8 @@ class IntercomHandler(logging.Handler):
 
         self.now = int(datetime.utcnow().timestamp())
 
-        logging.Handler.__init__(self, level=kwargs.get('level', logging.NOTSET))
+        level = kwargs.get('level', logging.NOTSET)
+        logging.Handler.__init__(self, level=level)
 
     def get_or_create_user(self, user_info):
         try:
@@ -42,7 +43,7 @@ class IntercomHandler(logging.Handler):
         try:
             return self.client.events.create(**event_info)
 
-        except IntercomError as e:
+        except IntercomError:
             logger.exception("Could not reach Intercom")
 
         except:

@@ -11,9 +11,6 @@ from intercom.event import Event
 from intercom.user import User
 import pytest
 
-from intercom_logging import IntercomHandler
-from intercom_logging.handlers import Client as IntercomClient
-
 
 LOGGING_CONFIG = {
     'version': 1,  # required for future compatibility
@@ -52,12 +49,15 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(params=[
-    ({'side_effect': ResourceNotFound}, {'return_value': User(email='new-user@email.com')}),
+    ({'side_effect': ResourceNotFound},
+     {'return_value': User(email='new-user@email.com')}),
     ({'return_value': User(email='existing-user@email.com')}, {}),
 ])
 def mock_intercom(mocker, request):
     mock_events = mocker.patch('intercom.client.Client.events')
-    mock_events.create = mocker.MagicMock(return_value=Event(event_name='testing'))
+    mock_events.create = mocker.MagicMock(
+        return_value=Event(event_name='testing')
+    )
 
     mock_users = mocker.patch('intercom.client.Client.users')
 
