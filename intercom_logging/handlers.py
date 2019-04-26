@@ -12,10 +12,10 @@ class IntercomHandler(logging.Handler):
     def __init__(self, *args, **kwargs):
         client = kwargs.get('client_cls', Client)
 
-        if kwargs.get('personal_access_token'):
-            self.client = client(personal_access_token=kwargs['personal_access_token'])
+        if kwargs.get('token'):
+            self.client = client(personal_access_token=kwargs['token'])
         else:
-            raise ValueError(':personal_access_token is a required configuration param')
+            raise ValueError('token is a required configuration param')
 
         self.now = int(datetime.utcnow().timestamp())
 
@@ -53,7 +53,7 @@ class IntercomHandler(logging.Handler):
                     getattr(record, 'event', None))):
             return
 
-        user, created = self.get_or_create_user(record.user)
+        user, _ = self.get_or_create_user(record.user)
         event = self.create_event(record.user, record.event)
 
-        print('logged {} for user {}!'.format(event, user))
+        print('logged {} for user {}!'.format(event.event_name, user.email))

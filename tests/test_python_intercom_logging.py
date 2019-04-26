@@ -33,7 +33,7 @@ LOGGING_CONFIG = {
         'intercom': {
             'level': 'INFO',
             'class': 'intercom_logging.IntercomHandler',
-            'personal_access_token': 'test-token',
+            'token': 'test-token',
             'formatter': 'console',
         },
     },
@@ -51,58 +51,32 @@ dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
 
-@pytest.fixture
-def user():
-    return User(email='some-user@email.com')
-
-
-@pytest.fixture
-def event():
-    return Event(event_name='testing')
-
-
-@pytest.fixture
-def mock_intercom(mocker, event):
+@pytest.fixture(params=[
+    ({'side_effect': ResourceNotFound}, {'return_value': User(email='new-user@email.com')}),
+    ({'return_value': User(email='existing-user@email.com')}, {}),
+])
+def mock_intercom(mocker, request):
     mock_events = mocker.patch('intercom.client.Client.events')
-    mock_events.create = mocker.MagicMock(return_value=event)
+    mock_events.create = mocker.MagicMock(return_value=Event(event_name='testing'))
 
-    return mocker.patch('intercom.client.Client.users')
+    mock_users = mocker.patch('intercom.client.Client.users')
 
-
-@pytest.fixture
-def mock_intercom_new_user(mock_intercom, mocker, user):
-    mock_intercom.find = mocker.MagicMock(side_effect=ResourceNotFound)
-    mock_intercom.create = mocker.MagicMock(return_value=user)
-
-
-@pytest.fixture
-def mock_intercom_existing_user(mock_intercom, mocker, user):
-    mock_intercom.find = mocker.MagicMock(return_value=user)
+    find_kwargs, create_kwargs = request.param
+    mock_users.find = mocker.MagicMock(**find_kwargs)
+    mock_users.create = mocker.MagicMock(**create_kwargs)
 
 
 def test_logging_not_fired_without_user():
     logger.info('this is a log message with no user')
 
 
-def test_new_user_created(mock_intercom_new_user):
-    logger.info('this is a log message with a new user', extra={
+def test_new_user_created(mock_intercom):
+    logger.info('this is a log message with a user', extra={
         'user': {'email': 'info+testing@datamade.us'},
         'event': {
             'event_name': 'testing',
             'metadata': {
                 'custom_attribute': 'hank hill',
-            },
-        },
-    })
-
-
-def test_existing_user_found(mock_intercom_existing_user):
-    logger.info('this is a log message with an existing user', extra={
-        'user': {'email': 'info+testing@datamade.us'},
-        'event': {
-            'event_name': 'testing',
-            'metadata': {
-                'custom_attribute': 'bobby hill',
             },
         },
     })
